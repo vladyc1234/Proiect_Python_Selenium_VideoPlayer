@@ -38,6 +38,8 @@
 			 h11-0.13.0 outcome-1.2.0 pyOpenSSL-22.0.0 pycparser-2.21 selenium-4.3.0 
 			 sniffio-1.2.0 sortedcontainers-2.4.0 trio-0.21.0 trio-websocket-0.9.2 wsproto-1.1.0
 
+- pip install screeninfo - installed screeninfo-0.8
+
 # Script Errors and Solutions:
 
 - ERROR - selenium.common.exceptions.WebDriverException: Message: 'chromedriver' executable needs to be in PATH.
