@@ -40,6 +40,8 @@
 
 - pip install pywin32 - installed pywin32-304
 
+- pip install scipy - installed scipy-1.8.1
+
 # Script Errors and Solutions:
 
 - ERROR - selenium.common.exceptions.WebDriverException: Message: 'chromedriver' executable needs to be in PATH.
