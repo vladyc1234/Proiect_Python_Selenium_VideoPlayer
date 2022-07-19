@@ -44,6 +44,8 @@
 
 - pip install soundfile - installed SoundFile-0.10.3.post1.dist-info
 
+- pip install moviepy - installed colorama-0.4.5 decorator-4.4.2 imageio-2.19.5 imageio_ffmpeg-0.4.7 moviepy-1.0.3 proglog-0.1.10 tqdm-4.64.0
+
 # Script Errors and Solutions:
 
 - ERROR - selenium.common.exceptions.WebDriverException: Message: 'chromedriver' executable needs to be in PATH.
