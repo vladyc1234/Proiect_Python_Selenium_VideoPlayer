@@ -42,6 +42,8 @@
 
 - pip install scipy - installed scipy-1.8.1
 
+- pip install soundfile - installed SoundFile-0.10.3.post1.dist-info
+
 # Script Errors and Solutions:
 
 - ERROR - selenium.common.exceptions.WebDriverException: Message: 'chromedriver' executable needs to be in PATH.
