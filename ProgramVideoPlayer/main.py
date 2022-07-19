@@ -9,117 +9,152 @@ import numpy as np
 import pyautogui
 import pyaudio
 import wave
-import asyncio
 import multiprocessing as mp
 from win32api import GetSystemMetrics
 import logging
+from scipy.io import wavfile
+import soundfile as sf
 
-# Prepare logger
-logging.basicConfig(filename="RecorderLog.log",
-                    format='%(asctime)s %(message)s',
-                    filemode='w')
+check_dbs = open("check_dbs.txt", "w")
 
-logger = logging.getLogger()
 
-logger.setLevel(logging.DEBUG)
+##################################################################
+# AUDIO PARAMETERS
 
-# Define the options of your webdriver here
-chrome_options = Options()
-chrome_options.add_experimental_option("detach", True)
+# Specify resolution
+resolution = (GetSystemMetrics(0), GetSystemMetrics(1))
 
-# Define webdriver here
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+# Specify video codec
+codec = cv2.VideoWriter_fourcc(*"XVID")
 
-# Select page to open here
-try:
-    driver.get("https://www.youtube.com")
-    driver.maximize_window()
-    logger.info('Opened YouTube in Chrome and maximized the window\n')
-    driver.implicitly_wait(2)
-except:
-    logger.error("error\n")
+# Specify name of Output file
+filename = "Recording.avi"
 
-# WEB PAGE CONTENT HERE
+# Specify frames rate. We can choose any
+# value and experiment with it
+fps = 17.0
 
-# Automatically accept Terms of Service for YouTube
-try:
-    button = driver.find_element(By.XPATH,
-                                 "/html/body/ytd-app/ytd-consent-bump-v2-lightbox/tp-yt-paper-dialog/div[4]/div[2]/div[6]/div[1]/ytd-button-renderer[2]/a/tp-yt-paper-button")
-    button.click()
-    logger.info('Accepted Terms of Service\n')
-    driver.implicitly_wait(2)
-except:
-    logger.error("Terms of Service didn't appear/ Page loaded too quickly/ other error\n")
+# Creating a VideoWriter object
+out = cv2.VideoWriter(filename, codec, fps, resolution)
 
-# Automatically select a random video from the first row
-# Refresh page to avoid certain errors
-driver.refresh()
-try:
-    video_to_select = np.random.randint(1, 4)
-    video = driver.find_element(By.XPATH, f"/html/body/ytd-app/div[1]/ytd-page-manager/ytd-browse/ytd-two-column-browse-results-renderer/div[1]/ytd-rich-grid-renderer/div[6]/ytd-rich-grid-row[1]/div/ytd-rich-item-renderer[{video_to_select}]/div/ytd-rich-grid-media/div[1]/div[2]/div[1]/h3/a")
-    video.click()
-    logger.info('Selected a random video\n')
-    driver.implicitly_wait(2)
-except:
-    logger.error("Page loaded too quickly/ other error\n")
+##################################################################
+##################################################################
+# AUDIO PARAMETERS
 
-# Automatically skip adds before recording
-# The program checks up to 4 ads with the variable check_ads
-# First it verifies if it is an unskippable ad then it checks if it is a skippable ad
-check_ads = 0
-while check_ads < 3:
+chunk = 1024  # Each chunk will consist of 1024 samples
+sample_format = pyaudio.paInt16  # 16 bits per sample
+channels = 1  # Number of audio channels
+fs = 44100  # Record at 44100 samples per second
+time_in_seconds = 3
+filename = "soundsample.wav"
+
+p = pyaudio.PyAudio()  # Create an interface to PortAudio
+
+# Open a Stream with the values we just defined
+stream = p.open(format=sample_format,
+                    channels=channels,
+                    rate=fs,
+                    frames_per_buffer=chunk,
+                    input=True)
+
+##################################################################
+
+
+
+
+
+def Selenium():
+    # Prepare logger
+    logging.basicConfig(filename="SeleniumLog.log",
+                        format='%(asctime)s %(message)s',
+                        filemode='w')
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    # Define the options of your webdriver here
+    chrome_options = Options()
+    chrome_options.add_experimental_option("detach", True)
+
+    # Define webdriver here
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+
+    # Select page to open here
     try:
-        check_skip_button = driver.find_element(By.ID, 'ad-image:4').value_of_css_property("display")
+        driver.get("https://www.youtube.com")
+        driver.maximize_window()
+        logger.info('Opened YouTube in Chrome and maximized the window\n')
+        driver.implicitly_wait(2)
+    except:
+        logger.error("error\n")
 
-        while check_skip_button != "none":
+    # WEB PAGE CONTENT HERE
+
+    # Automatically accept Terms of Service for YouTube
+    try:
+        button = driver.find_element(By.XPATH, "/html/body/ytd-app/ytd-consent-bump-v2-lightbox/tp-yt-paper-dialog/div[4]/div[2]/div[6]/div[1]/ytd-button-renderer[2]/a/tp-yt-paper-button")
+        button.click()
+        logger.info('Accepted Terms of Service\n')
+        driver.implicitly_wait(2)
+    except:
+        logger.error("Terms of Service didn't appear/ Page loaded too quickly/ other error\n")
+
+    # Automatically select a random video from the first row
+    # Refresh page to avoid certain errors
+    driver.refresh()
+    try:
+        video_to_select = np.random.randint(1, 4)
+        video = driver.find_element(By.XPATH, f"/html/body/ytd-app/div[1]/ytd-page-manager/ytd-browse/ytd-two-column-browse-results-renderer/div[1]/ytd-rich-grid-renderer/div[6]/ytd-rich-grid-row[1]/div/ytd-rich-item-renderer[{video_to_select}]/div/ytd-rich-grid-media/div[1]/div[2]/div[1]/h3/a")
+        video.click()
+        logger.info('Selected a random video\n')
+        driver.implicitly_wait(2)
+    except:
+        logger.error("Page loaded too quickly/ other error\n")
+
+    # Automatically skip adds before recording
+    # The program checks up to 4 ads with the variable check_ads
+    # First it verifies if it is an unskippable ad then it checks if it is a skippable ad
+    check_ads = 0
+    while check_ads < 3:
+        try:
             check_skip_button = driver.find_element(By.ID, 'ad-image:4').value_of_css_property("display")
 
-    except:
-        logger.warning("no unskippable adds\n")
+            while check_skip_button != "none":
+                check_skip_button = driver.find_element(By.ID, 'ad-image:4').value_of_css_property("display")
 
+        except:
+            logger.warning("no unskippable adds\n")
+
+        try:
+            skip_button = driver.find_element(By.XPATH, "//button[contains(@class, 'ytp-ad-skip-button ytp-button')]")
+            skip_button.click()
+            logger.info('Skipped an ad\n')
+        except:
+            logger.warning("no skippable adds\n")
+
+        check_ads += 1
+
+    # Refresh the page in order for the VideoRecorder script to catch-up with the webpage
+    driver.refresh()
+    driver.implicitly_wait(1)
+
+    # Automatically put video in fullscreen
     try:
-        skip_button = driver.find_element(By.XPATH, "//button[contains(@class, 'ytp-ad-skip-button ytp-button')]")
-        skip_button.click()
-        logger.info('Skipped an ad\n')
+        video_fullscreen_button = driver.find_element(By.XPATH, "//button[contains(@class, 'ytp-fullscreen-button ytp-button')]")
+        video_fullscreen_button.click()
+        logger.info('Video now in fullscreen\n')
+        driver.implicitly_wait(3)
     except:
-        logger.warning("no skippable adds\n")
-
-    check_ads += 1
-
-# Refresh the page in order for the VideoRecorder script to catch-up with the webpage
-driver.refresh()
-driver.implicitly_wait(1)
-
-# Automatically put video in fullscreen
-try:
-    video_fullscreen_button = driver.find_element(By.XPATH,
-                                                  "//button[contains(@class, 'ytp-fullscreen-button ytp-button')]")
-    video_fullscreen_button.click()
-    logger.info('Video now in fullscreen\n')
-    driver.implicitly_wait(3)
-except:
-    logger.error("Page loaded too quickly/ other error\n")
+        logger.error("Page loaded too quickly/ other error\n")
 
 
 # AUDIO RECORDER
 
-def record_video():
-    # Specify resolution
-    resolution = (GetSystemMetrics(0), GetSystemMetrics(1))
-
-    # Specify video codec
-    codec = cv2.VideoWriter_fourcc(*"DIVX")
-
-    # Specify name of Output file
-    filename = "Recording.avi"
-
-    # Specify frames rate. We can choose any
-    # value and experiment with it
-    fps = 17.0
-
-    # Creating a VideoWriter object
-    out = cv2.VideoWriter(filename, codec, fps, resolution)
-
+def record_video(queue):
+    print("RECORD VIDEO", time.strftime("%H:%M:%S"))
+    logging.basicConfig(filename="VideoLog.log",
+                        format='%(asctime)s %(message)s',
+                        filemode='w')
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
     # Create an Empty window
     cv2.namedWindow("Live", cv2.WINDOW_NORMAL)
 
@@ -129,7 +164,7 @@ def record_video():
     start_record = time.time()
     current_record_time = time.time()
     logger.info("Start video recording\n")
-    while True and current_record_time - start_record < 120:
+    while True and current_record_time - start_record < 3:
 
         current_record_time = time.time()
 
@@ -139,12 +174,8 @@ def record_video():
         # Convert the screenshot to a numpy array
         frame = np.array(img)
 
-        # Convert it from BGR(Blue, Green, Red) to
-        # RGB(Red, Green, Blue)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
         # Write it to the output file
-        out.write(frame)
+        queue.put(frame)
 
         # Optional: Display the recording screen
         cv2.imshow('Live', frame)
@@ -154,31 +185,24 @@ def record_video():
             break
 
     # Release the Video writer
-    out.release()
     logger.info("End video recording\n")
     # Destroy all windows
     cv2.destroyAllWindows()
+    queue.close()
+    out.release()
+
 
 #AUDIO RECORDER
 
 def record_audio():
-    chunk = 1024  # Each chunk will consist of 1024 samples
-    sample_format = pyaudio.paInt16  # 16 bits per sample
-    channels = 1  # Number of audio channels
-    fs = 44100  # Record at 44100 samples per second
-    time_in_seconds = 3
-    filename = "soundsample.wav"
-
-    p = pyaudio.PyAudio()  # Create an interface to PortAudio
+    logging.basicConfig(filename="AudioLog.log",
+                        format='%(asctime)s %(message)s',
+                        filemode='w')
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    print("RECORD AUDIO", time.strftime("%H:%M:%S"))
 
     logger.info("Start audio recording\n")
-
-    # Open a Stream with the values we just defined
-    stream = p.open(format=sample_format,
-                    channels=channels,
-                    rate=fs,
-                    frames_per_buffer=chunk,
-                    input=True)
 
     frames = []  # Initialize array to store frames
 
@@ -204,15 +228,84 @@ def record_audio():
     file.writeframes(b''.join(frames))
     file.close()
 
+def rms_flat(a):  # from matplotlib.mlab
+    """
+    Return the root mean square of all the elements of *a*, flattened out.
+    """
+    return np.sqrt(np.mean(np.absolute(a)**2))
+
+
+def measure_wav_db_level(wavFile):
+    """
+    Open a wave or raw audio file and perform the following tasks:
+    - compute the overall level in db (RMS of data)
+    """
+    try:
+        fs, x = wavfile.read(wavFile)
+        LOG_SCALE = 20*np.log10(32767)
+    except:
+        x, fs = sf.read(wavFile,
+                        channels=1, samplerate=44100,
+                        format='RAW', subtype='PCM_16')
+        LOG_SCALE = 0
+    t = (np.array(x)).astype(np.float64)
+    # x holds the int16 data, but it's hard to work on int16
+    # t holds the float64 conversion
+
+    check_dbs.writelines(str(fs) + ' Hz\n')
+    check_dbs.writelines(str(len(t) / fs) + ' s\n')
+    orig_SPL = 20*np.log10(rms_flat(t)) - LOG_SCALE
+    check_dbs.writelines('Sound level:   ' + str(orig_SPL) + ' dBFS\n')
+
+def combine_audio(vidname, audname, outname, fps=17):
+    import moviepy.editor as mpe
+    my_clip = mpe.VideoFileClip(vidname)
+    audio_background = mpe.AudioFileClip(audname)
+    final_clip = my_clip.set_audio(audio_background)
+    final_clip.write_videofile(outname, fps=fps)
 
 if __name__ == '__main__':
-    process1 = mp.Process(target=record_video())
-    print(time.strftime("%H:%M:%S"))
-    process2 = mp.Process(target=record_audio())
-    print(time.strftime("%H:%M:%S"))
+
+    logging.basicConfig(filename="MainLog.log",
+                        format='%(asctime)s %(message)s',
+                        filemode='w')
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    # PREPARE A QUEUE TO RECEIVE FRAME FROM VIDEO RECORD
+    queue = mp.Queue()
+
+    Selenium()
+
+    # DECLARE VIDEO RECORD PROCESS
+    process1 = mp.Process(target=record_video, args=(queue,))
+    print("PROCESS1", time.strftime("%H:%M:%S"))
+    logger.info("PROCESS1 starts")
+
+    # DECLARE AUDIO RECORD PROCESS
+    process2 = mp.Process(target=record_audio, args=())
+    print("PROCESS2", time.strftime("%H:%M:%S"))
+    logger.info("PROCESS2 starts")
+
+    # START PROCESSES
     process1.start()
-    print(time.strftime("%H:%M:%S"))
     process2.start()
-    print(time.strftime("%H:%M:%S"))
+
+    # RECEIVE FRAME FROM QUEUE AND WRITE THEM TO FILE
+    fr = queue.get()
+    while fr.any():
+        out.write(cv2.cvtColor(fr, cv2.COLOR_BGR2RGB))
+        fr = queue.get()
+
+
+    # END PROCESSES
     process1.join()
+    process1.close()
     process2.join()
+    process2.close()
+
+    # MEASURE DBs
+    measure_wav_db_level("soundsample.wav")
+
+    # MERGE AUDIO AND VIDEO FILES
+    combine_audio("Recording.avi", "soundsample.wav", "FinalRecording.mp4", fps=17)
