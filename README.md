@@ -65,17 +65,17 @@ Results: You will get a 2 minute recording, Logs for each main function (VideoLo
 
 # How does the script work
 
-	The script is split up in different sections. It has the first section in which you set the parameters for your audio and video recorders and then it has it's 3 main functions.
+The script is split up in different sections. It has the first section in which you set the parameters for your audio and video recorders and then it has it's 3 main functions.
 
-	The first function in Selenium(). It it responsible for opening the YouTube page in Chrome. It accepts the Terms of Service, selects a random video and skips its ads.
+The first function in Selenium(). It it responsible for opening the YouTube page in Chrome. It accepts the Terms of Service, selects a random video and skips its ads.
 	
-	The second function is record_video(). It is the function responsible for recording the YouYube video. It works by screenshoting the video frames and then piecing them up into a full video.
+The second function is record_video(). It is the function responsible for recording the YouYube video. It works by screenshoting the video frames and then piecing them up into a full video.
 	
-	The third function is record_audo(). It records the audio. It takes chunks of data reads them and then adds them to a file after processing them.
+The third function is record_audo(). It records the audio. It takes chunks of data reads them and then adds them to a file after processing them.
 	
-	The program also contains a function for analyzing the audio measure_wav_db_level(wavFile) and rms_flat(a) and a function for merging the audio and video recordings combine_audio(vidname, audname, outname, fps=17). 
+The program also contains a function for analyzing the audio measure_wav_db_level(wavFile) and rms_flat(a) and a function for merging the audio and video recordings combine_audio(vidname, audname, outname, fps=17). 
 
-	In the final section it calls these functions. It uses multiprocessing in order to run the video and audio record functions at the same time. It then analyzes the audio file and merge the recordings.
+In the final section it calls these functions. It uses multiprocessing in order to run the video and audio record functions at the same time. It then analyzes the audio file and merge the recordings.
 	
 
 		
