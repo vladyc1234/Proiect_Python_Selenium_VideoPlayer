@@ -51,7 +51,31 @@
 - ERROR - selenium.common.exceptions.WebDriverException: Message: 'chromedriver' executable needs to be in PATH.
   SOLUTION - pip install webdriver-manager - installed python-dotenv-0.20.0 webdriver-manager-3.8.1
 
+# How to use:
 
+1. Have a functional mic plugged in
+
+2. Open the Sounds menu: enable stereo mix in recording section and disable speakers in playback section
+
+3. Open your PyCharm, download the necessary libraries and copy the script
+
+4. Run the script and wait for its completion
+
+Results: You will get a 2 minute recording, Logs for each main function (VideoLog.txt, AudioLog.txt, SeleniumLog.txt, MainLog.txt) and details about the sound properties (check_dbs)
+
+# How does the script work
+
+	The script is split up in different sections. It has the first section in which you set the parameters for your audio and video recorders and then it has it's 3 main functions.
+
+	The first function in Selenium(). It it responsible for opening the YouTube page in Chrome. It accepts the Terms of Service, selects a random video and skips its ads.
+	
+	The second function is record_video(). It is the function responsible for recording the YouYube video. It works by screenshoting the video frames and then piecing them up into a full video.
+	
+	The third function is record_audo(). It records the audio. It takes chunks of data reads them and then adds them to a file after processing them.
+	
+	The program also contains a function for analyzing the audio measure_wav_db_level(wavFile) and rms_flat(a) and a function for merging the audio and video recordings combine_audio(vidname, audname, outname, fps=17). 
+
+	In the final section it calls these functions. It uses multiprocessing in order to run the video and audio record functions at the same time. It then analyzes the audio file and merge the recordings.
 	
 
 		
