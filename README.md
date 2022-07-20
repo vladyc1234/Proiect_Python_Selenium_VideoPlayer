@@ -46,16 +46,28 @@
 
 - pip install moviepy - installed colorama-0.4.5 decorator-4.4.2 imageio-2.19.5 imageio_ffmpeg-0.4.7 moviepy-1.0.3 proglog-0.1.10 tqdm-4.64.0
 
+- pre-installed libraries from PyCharm - time, logging, urllib
+
 # Script Errors and Solutions:
 
 - ERROR - selenium.common.exceptions.WebDriverException: Message: 'chromedriver' executable needs to be in PATH.
   SOLUTION - pip install webdriver-manager - installed python-dotenv-0.20.0 webdriver-manager-3.8.1
+  
+- ERROR - couldn't run the video and record functions at the same time
+  SOLUTION - I used processes to run them in parallel
+  
+- ERROR - my video was getting corrupted by the record function when used in a process 
+  SOLUTION - I used a multiprocess variable manager in order to save my video frames in that variable and then send them in the main section after the process finished
+             in order to transform them in video form
+
+- ERROR - my webpage was loading too slow and my webdriver couldn't select the specified elements
+  SOLUTION - I used driver.implicitly_wait() to let the page load first
 
 # How to use:
 
 1. Have a functional mic plugged in
 
-2. Open the Sounds menu: enable stereo mix in recording section and disable speakers in playback section
+2. Open the Sounds menu: enable only your mic in the recording section and only your screen speakers in the playback section
 
 3. Open your PyCharm, download the necessary libraries and copy the script
 
@@ -73,7 +85,7 @@ The second function is record_video(). It is the function responsible for record
 	
 The third function is record_audo(). It records the audio. It takes chunks of data reads them and then adds them to a file after processing them.
 	
-The program also contains a function for analyzing the audio measure_wav_db_level(wavFile) and rms_flat(a) and a function for merging the audio and video recordings combine_audio(vidname, audname, outname, fps=17). 
+The program also contains a function for analyzing the audio measure_wav_db_level(wavFile) and rms_flat(a), a function for merging the audio and video recordings combine_audio(vidname, audname, outname, fps=17) and a function for checking the internet connection check_connection().
 
 In the final section it calls these functions. It uses multiprocessing in order to run the video and audio record functions at the same time. It then analyzes the audio file and merge the recordings.
 	
